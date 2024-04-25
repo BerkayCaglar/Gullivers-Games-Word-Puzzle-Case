@@ -29,5 +29,10 @@ namespace GameCore.LevelSystem
         {
             this.levels = levels;
         }
+
+        public void Setup(List<LevelData> levelDatas)
+        {
+            levels = levelDatas.ToArray();
+        }
     }
 }
