@@ -27,7 +27,7 @@ namespace GameCore.UI.Segments
         {
             levelPointText.text = segmentData.LevelPoint.ToString();
             levelNameText.text = segmentData.LevelName;
-            levelHighScoreText.text = segmentData.LevelHighScore;
+            levelHighScoreText.text = segmentData.LevelHighScore.ToString();
 
             var isLevelEnoughToUnlock = PlayerManager.Instance.IsCurrentLevelEnoughToUnlockLevel(segmentData.LevelPoint);
 

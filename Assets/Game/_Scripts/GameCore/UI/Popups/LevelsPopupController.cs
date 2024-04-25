@@ -1,12 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using GameCore.LevelSystem;
+using GameCore.PopupSystem;
 using GameCore.UI.Segments;
 using UnityEngine;
 
-namespace GameCore.UI
+namespace GameCore.UI.Popups
 {
-    public class MainMenuCanvasController : MonoBehaviour
+    public class LevelsPopupController : PopupPanel
     {
         [BHeader("References")]
         [SerializeField] private Transform content;
@@ -14,7 +15,7 @@ namespace GameCore.UI
         [BHeader("Prefabs")]
         [SerializeField] private LevelSegment levelSegmentPrefab;
 
-        private void Awake()
+        public override void OnOpenPanel()
         {
             var levels = LevelManager.Instance.GetLevels();
             foreach (var level in levels)
@@ -22,11 +23,21 @@ namespace GameCore.UI
                 var levelSegment = Instantiate(levelSegmentPrefab, content);
                 levelSegment.Setup(new SegmentData
                 {
-                    LevelPoint = level.level,
+                    LevelPoint = level.levelPoint,
                     LevelName = level.title,
-                    LevelHighScore = "0"
+                    LevelHighScore = HighScoreSystem.HighScoreManager.Instance.GetHighScore(level.levelPoint)
                 });
             }
+        }
+
+        public override void OnClosePanel()
+        {
+
+        }
+
+        public void OnClickCloseButton()
+        {
+            gameObject.SetActive(false);
         }
     }
 }

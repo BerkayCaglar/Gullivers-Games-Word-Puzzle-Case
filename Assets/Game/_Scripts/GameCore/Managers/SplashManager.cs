@@ -4,6 +4,8 @@ using GameCore.LevelSystem;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
+using GameCore.HighScoreSystem;
+using System;
 
 namespace GameCore.Managers
 {
@@ -11,21 +13,43 @@ namespace GameCore.Managers
     {
         private void Awake()
         {
+            SetupScriptableObjectInstances();
+            GetLevels();
+        }
+
+        private void SetupScriptableObjectInstances()
+        {
+            var scriptableObjects = Resources.LoadAll<ScriptableObject>("ScriptableObjects/");
+            foreach (var scriptableObject in scriptableObjects)
+            {
+                var type = scriptableObject.GetType();
+                var property = type.GetProperty("Instance");
+                var instance = property.GetValue(null);
+            }
+        }
+
+        private void GetLevels()
+        {
             var levelsDatabasePath = "LevelsDatabase/";
-            //var stringWordsDatabasePath = "StringWordsDatabase/";
             var levels = Resources.LoadAll<TextAsset>(levelsDatabasePath);
 
             var levelDatas = new List<LevelData>();
             foreach (var level in levels)
             {
                 var levelData = JsonConvert.DeserializeObject<LevelData>(level.text);
-                levelData.level = int.Parse(level.name.Split('_').Last());
+                levelData.levelPoint = int.Parse(level.name.Split('_').Last());
                 levelDatas.Add(levelData);
             }
 
-            levelDatas.Sort((a, b) => a.level.CompareTo(b.level));
+            levelDatas.Sort((a, b) => a.levelPoint.CompareTo(b.levelPoint));
 
-            LevelManager.Instance.SetLevels(levelDatas.ToArray());
+            SetupManagers(levelDatas);
+        }
+
+        private void SetupManagers(List<LevelData> levelDatas)
+        {
+            LevelManager.Instance.Setup(levelDatas);
+            HighScoreManager.Instance.Setup(levelDatas);
         }
     }
 }
