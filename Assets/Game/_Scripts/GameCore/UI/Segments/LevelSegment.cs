@@ -29,7 +29,7 @@ namespace GameCore.UI.Segments
             levelNameText.text = segmentData.LevelName;
             levelHighScoreText.text = segmentData.LevelHighScore.ToString();
 
-            var isLevelEnoughToUnlock = PlayerManager.Instance.IsCurrentLevelEnoughToUnlockLevel(segmentData.LevelPoint);
+            var isLevelEnoughToUnlock = PlayerManager.Instance.IsCurrentPlayerLevelEnoughToUnlockLevel(segmentData.LevelPoint);
 
             highScoreLockIcon.SetActive(!isLevelEnoughToUnlock);
             levelHighScoreText.gameObject.SetActive(isLevelEnoughToUnlock);
@@ -40,6 +40,17 @@ namespace GameCore.UI.Segments
             playButton.interactable = isLevelEnoughToUnlock;
 
             segmentState = isLevelEnoughToUnlock ? SegmentState.Unlocked : SegmentState.Locked;
+        }
+
+        public void OnClickPlayButton()
+        {
+            if (segmentState == SegmentState.Locked)
+            {
+                Debug.Log("Level is locked!");
+                return;
+            }
+
+            PlayerManager.Instance.SetCurrentPlayingLevel(int.Parse(levelPointText.text));
         }
     }
 }

@@ -34,10 +34,5 @@ namespace GameCore.UI.Popups
         {
 
         }
-
-        public void OnClickCloseButton()
-        {
-            gameObject.SetActive(false);
-        }
     }
 }

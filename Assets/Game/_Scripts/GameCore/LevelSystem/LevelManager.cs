@@ -2,13 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GameCore.SingletonSystem;
+using MyBox;
+using Newtonsoft.Json;
+using System.Linq;
 
 namespace GameCore.LevelSystem
 {
     [CreateAssetMenu(fileName = "LevelManager", menuName = "ScriptableObjects/LevelManager", order = 1)]
     public class LevelManager : ScriptableResourceSingleton<LevelManager>
     {
-        public LevelData[] levels;
+        public LevelData[] levels = new LevelData[0];
 
         public LevelData[] GetLevels()
         {
@@ -33,6 +36,30 @@ namespace GameCore.LevelSystem
         public void Setup(List<LevelData> levelDatas)
         {
             levels = levelDatas.ToArray();
+        }
+
+        public LevelData GetLevelTiles(int level)
+        {
+            return levels[level - 1];
+        }
+
+        [ButtonMethod]
+        public void GetLevelsFromResources()
+        {
+            var levelsDatabasePath = "LevelsDatabase/";
+            var levels = Resources.LoadAll<TextAsset>(levelsDatabasePath);
+
+            var levelDatas = new List<LevelData>();
+            foreach (var level in levels)
+            {
+                var levelData = JsonConvert.DeserializeObject<LevelData>(level.text);
+                levelData.levelPoint = int.Parse(level.name.Split('_').Last());
+                levelDatas.Add(levelData);
+            }
+
+            levelDatas.Sort((a, b) => a.levelPoint.CompareTo(b.levelPoint));
+
+            Setup(levelDatas);
         }
     }
 }

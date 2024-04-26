@@ -8,21 +8,32 @@ namespace GameCore.Managers
     [CreateAssetMenu(fileName = "PlayerManager", menuName = "ScriptableObjects/PlayerManager", order = 1)]
     public class PlayerManager : ScriptableResourceSingleton<PlayerManager>
     {
-        public int CurrentLevel;
+        public int CurrentPlayerLevel;
+        public int CurrentPlayingLevel;
 
-        public void SetCurrentLevel(int level)
+        public void SetCurrentPlayerLevel(int level)
         {
-            CurrentLevel = level;
+            CurrentPlayerLevel = level;
         }
 
-        public int GetCurrentLevel()
+        public void SetCurrentPlayingLevel(int level)
         {
-            return CurrentLevel;
+            CurrentPlayingLevel = level;
         }
 
-        public bool IsCurrentLevelEnoughToUnlockLevel(int level)
+        public int GetCurrentPlayerLevel()
         {
-            return CurrentLevel >= level;
+            return CurrentPlayerLevel;
+        }
+
+        public int GetCurrentPlayingLevel()
+        {
+            return CurrentPlayingLevel;
+        }
+
+        public bool IsCurrentPlayerLevelEnoughToUnlockLevel(int level)
+        {
+            return CurrentPlayerLevel >= level;
         }
     }
 }
