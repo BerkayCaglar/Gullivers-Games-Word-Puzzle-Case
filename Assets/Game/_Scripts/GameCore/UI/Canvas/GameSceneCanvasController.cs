@@ -19,6 +19,7 @@ namespace GameCore.UI.Canvas
     public class GameSceneCanvasController : UIPanel
     {
         [SerializeField] private GameObject _undoArea;
+        [SerializeField] private GameObject _submitArea;
 
         public override void OnOpenPanel()
         {
@@ -35,19 +36,19 @@ namespace GameCore.UI.Canvas
             TileActions.OnAnswerTilesChanged -= OnAnswerTilesChanged;
         }
 
-        private Tween _undoTween;
         private void OnAnswerTilesChanged()
         {
             switch (AnswerTilesManager.Instance.IsAnswerTilesEmpty())
             {
                 case true:
-                    if (_undoTween != null) _undoTween.Kill();
-                    _undoTween = _undoArea.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => { _undoArea.SetActive(false); _undoTween = null; });
+                    _undoArea.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => { _undoArea.SetActive(false); });
+                    _submitArea.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => { _submitArea.SetActive(false); }).SetDelay(0.2f);
                     break;
                 case false:
-                    if (_undoTween != null) _undoTween.Kill();
                     _undoArea.SetActive(true);
-                    _undoTween = _undoArea.transform.DOScale(Vector3.one, 0.2f).OnComplete(() => _undoTween = null);
+                    _submitArea.SetActive(true);
+                    _undoArea.transform.DOScale(Vector3.one, 0.2f);
+                    _submitArea.transform.DOScale(Vector3.one, 0.2f).SetDelay(0.2f);
                     break;
             }
         }
