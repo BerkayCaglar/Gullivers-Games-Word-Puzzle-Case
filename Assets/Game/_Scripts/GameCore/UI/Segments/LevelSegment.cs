@@ -51,6 +51,7 @@ namespace GameCore.UI.Segments
             }
 
             PlayerManager.Instance.SetCurrentPlayingLevel(int.Parse(levelPointText.text));
+            _ = SceneControlManager.Instance.LoadSceneWithFadeInAnimation(SceneName.GameScene, useLoadingScene: true);
         }
     }
 }

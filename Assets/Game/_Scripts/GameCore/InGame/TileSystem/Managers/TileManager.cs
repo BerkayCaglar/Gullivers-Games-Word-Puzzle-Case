@@ -1,6 +1,4 @@
-using System;
 using GameCore.InGame.TileSystem.Controllers;
-using GameCore.InGame.TileSystem.Managers;
 using GameCore.TileSystem.Architecture;
 using UnityEngine;
 using DG.Tweening;
@@ -10,6 +8,7 @@ using MyBox;
 using GameCore.PopupSystem.VFXPoolSystem;
 using GameCore.CameraSystem;
 using System.Linq;
+using GameCore.InGame.TileSystem.Managers.Answer;
 
 namespace GameCore.TileSystem.Managers
 {

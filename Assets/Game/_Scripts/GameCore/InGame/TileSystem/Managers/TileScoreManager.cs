@@ -25,5 +25,24 @@ namespace GameCore.TileSystem.Managers
 
             return score;
         }
+
+        public static int GetWordScore(string word)
+        {
+            if (string.IsNullOrEmpty(word))
+            {
+                Debug.LogError($"<color=green>[TILE MANAGER]</color> -> Word is empty");
+                return 0;
+            }
+
+            var score = 0;
+            foreach (var character in word)
+            {
+                score += GetCharacterScore(character.ToString());
+            }
+
+            score *= 10 * word.Length;
+
+            return score;
+        }
     }
 }

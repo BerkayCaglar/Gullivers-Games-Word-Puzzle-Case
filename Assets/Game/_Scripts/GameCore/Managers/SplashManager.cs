@@ -5,7 +5,6 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
 using GameCore.HighScoreSystem;
-using System;
 
 namespace GameCore.Managers
 {
@@ -15,6 +14,7 @@ namespace GameCore.Managers
         {
             SetupScriptableObjectInstances();
             GetLevels();
+            GetEnglishDictionary();
         }
 
         private void SetupScriptableObjectInstances()
@@ -44,6 +44,11 @@ namespace GameCore.Managers
             levelDatas.Sort((a, b) => a.levelPoint.CompareTo(b.levelPoint));
 
             SetupManagers(levelDatas);
+        }
+
+        private void GetEnglishDictionary()
+        {
+            PossibleWordsSystem.PossibleWordsGenerator.LoadDictionary();
         }
 
         private void SetupManagers(List<LevelData> levelDatas)

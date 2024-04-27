@@ -1,20 +1,81 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using DG.Tweening;
 using GameCore.InGame.TileSystem.Controllers;
+using GameCore.PopupSystem.VFXPoolSystem;
 using GameCore.SingletonSystem;
 using GameCore.TileSystem.Architecture;
 using GameCore.TileSystem.Controllers;
+using GameCore.TileSystem.Managers;
 using MyBox;
 using UnityEngine;
 
-namespace GameCore.InGame.TileSystem.Managers
+namespace GameCore.InGame.TileSystem.Managers.Answer
 {
     public class AnswerTilesManager : AutoSingleton<AnswerTilesManager>
     {
         [SerializeField] private AnswerTileController[] _answerTileControllers;
+
+        #region Events
+        private void Start()
+        {
+            TileActions.OnAnswerCheck += OnAnswerCheck;
+            TileActions.OnScoreChanged += OnScoreChanged;
+        }
+
+        private void OnDestroy()
+        {
+            TileActions.OnAnswerCheck -= OnAnswerCheck;
+            TileActions.OnScoreChanged -= OnScoreChanged;
+        }
+
+        private void OnAnswerCheck(bool isCorrect)
+        {
+            ShakeAnswerTiles(isCorrect);
+        }
+
+        private Tween _shakeTween;
+        private void ShakeAnswerTiles(bool isCorrect)
+        {
+            switch (isCorrect)
+            {
+                case true:
+                    if (_shakeTween != null) return;
+                    _shakeTween = transform.DOShakePosition(0.5f, 0.02f, 50, 90, false, true).SetLoops(-1, LoopType.Yoyo);
+                    break;
+                case false:
+                    if (_shakeTween != null)
+                    {
+                        _shakeTween.Kill();
+                        _shakeTween = null;
+                    }
+                    break;
+            }
+        }
+
+        private async void OnScoreChanged(int score)
+        {
+            _shakeTween?.Kill();
+            _shakeTween = null;
+
+            TileRaycastManager.LockTouch = true;
+            foreach (var answerTileController in _answerTileControllers.Reverse())
+            {
+                var TLC = answerTileController.GetCurrentTileController();
+                if (TLC == null) continue;
+                TLC.SetTileState(TileState.Used);
+                VFXPooler.Instance.SpawnFromPool(VFXType.ConfettiBurstVFX, TLC.transform.position, Quaternion.identity, 0.5f);
+                await TLC.transform.DOPunchScale(Vector3.one * 0.1f, 0.1f).AsyncWaitForCompletion();
+                await TLC.transform.DOScale(Vector3.zero, 0.1f).AsyncWaitForCompletion();
+                TLC.gameObject.SetActive(false);
+            }
+
+            ResetAnswerTiles();
+            TileRaycastManager.LockTouch = false;
+        }
+
+        #endregion
 
         internal AnswerTileController SetAnswerTileController(TileController tileController)
         {
@@ -93,10 +154,9 @@ namespace GameCore.InGame.TileSystem.Managers
 
         #endregion
 
-        internal (string, string[]) GetAnswer()
+        internal string GetAnswer()
         {
             StringBuilder answerBuilder = new();
-            string[] answerChars = new string[_answerTileControllers.Length];
 
             for (int i = 0; i < _answerTileControllers.Length; i++)
             {
@@ -104,11 +164,10 @@ namespace GameCore.InGame.TileSystem.Managers
                 {
                     var character = _answerTileControllers[i].GetCharacter();
                     answerBuilder.Append(character);
-                    answerChars.Append(character);
                 }
             }
 
-            return (answerBuilder.ToString(), answerChars);
+            return answerBuilder.ToString();
         }
 
         internal AnswerTileController GetAnswerTileController(TileController tileController)

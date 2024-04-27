@@ -7,6 +7,7 @@ namespace GameCore.LevelSystem
     {
         public string title;
         public int levelPoint;
+        public string[] correctAnswers;
         public LevelTileData[] tiles;
     }
 
