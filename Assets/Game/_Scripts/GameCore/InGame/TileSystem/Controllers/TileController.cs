@@ -101,7 +101,6 @@ namespace GameCore.InGame.TileSystem.Controllers
             {
                 if (currentState == TileState.Using)
                 {
-                    //Debug.Log($"<color=red>[TILE MANAGER]</color> Child: <color=yellow>{child.GetCharacter()}</color>");
                     child._tileElements.ParentTiles.Remove(this);
 
                     if (child._tileElements.GetParentTiles().Count == 0)
@@ -109,7 +108,6 @@ namespace GameCore.InGame.TileSystem.Controllers
                 }
                 else if (currentState == TileState.NotUsing)
                 {
-                    //Debug.Log($"<color=green>[TILE MANAGER]</color> Child: <color=yellow>{child.GetCharacter()}</color>");
                     child._tileElements.ParentTiles.Add(this);
 
                     if (child._tileElements.GetParentTiles().Count > 0)

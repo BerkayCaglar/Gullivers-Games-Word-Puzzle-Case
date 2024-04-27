@@ -9,7 +9,10 @@ using GameCore.PopupSystem;
 using GameCore.TileSystem;
 using GameCore.TileSystem.Architecture;
 using GameCore.TileSystem.Controllers;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace GameCore.UI.Canvas
 {
@@ -47,13 +50,6 @@ namespace GameCore.UI.Canvas
                     _undoTween = _undoArea.transform.DOScale(Vector3.one, 0.2f).OnComplete(() => _undoTween = null);
                     break;
             }
-        }
-
-        public void OnClickUndo()
-        {
-            if (AnswerTilesManager.Instance.IsAnswerTilesEmpty())
-                return;
-            AnswerTilesManager.Instance.UndoSingleAnswerTile();
         }
     }
 }

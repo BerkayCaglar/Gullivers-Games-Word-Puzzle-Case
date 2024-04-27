@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,16 +47,51 @@ namespace GameCore.InGame.TileSystem.Managers
             TileActions.AnswerTilesChanged();
         }
 
+        #region Single Undo
+
         internal void UndoSingleAnswerTile()
         {
-            // Find the last filled answer tile
             var lastFilledAnswerTile = _answerTileControllers.LastOrDefault(x => x.GetState() == TileEmptyState.Filled);
-
-            // If there is no filled answer tile, return
             if (lastFilledAnswerTile == null) return;
-
+            StopUndoMultipleAnswerTiles();
             TileActions.ClickTile(lastFilledAnswerTile);
         }
+
+        #endregion
+
+        #region Multiple Undo
+
+        private Coroutine _undoMultipleAnswerTilesCoroutine;
+        internal void UndoMultipleAnswerTiles()
+        {
+            StopUndoMultipleAnswerTiles();
+            _undoMultipleAnswerTilesCoroutine = StartCoroutine(MultipleUndoSequence());
+        }
+
+        internal void StopUndoMultipleAnswerTiles()
+        {
+            if (_undoMultipleAnswerTilesCoroutine != null)
+            {
+                StopCoroutine(_undoMultipleAnswerTilesCoroutine);
+                _undoMultipleAnswerTilesCoroutine = null;
+            }
+        }
+
+        internal IEnumerator MultipleUndoSequence()
+        {
+            yield return new WaitForSeconds(0.5f);
+            var lastFilledAnswerTile = _answerTileControllers.LastOrDefault(x => x.GetState() == TileEmptyState.Filled);
+            if (lastFilledAnswerTile == null) yield break;
+
+            while (lastFilledAnswerTile != null)
+            {
+                TileActions.ClickTile(lastFilledAnswerTile);
+                yield return new WaitForSeconds(0.1f);
+                lastFilledAnswerTile = _answerTileControllers.LastOrDefault(x => x.GetState() == TileEmptyState.Filled);
+            }
+        }
+
+        #endregion
 
         internal (string, string[]) GetAnswer()
         {

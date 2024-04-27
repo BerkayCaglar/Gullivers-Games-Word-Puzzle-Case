@@ -4,7 +4,7 @@ using GameCore.SingletonSystem;
 using System.Threading.Tasks;
 using System;
 
-namespace GameCore.UI
+namespace GameCore.UI.Camera
 {
     public class CameraUIAnimations : PersistentSingleton<CameraUIAnimations>
     {
