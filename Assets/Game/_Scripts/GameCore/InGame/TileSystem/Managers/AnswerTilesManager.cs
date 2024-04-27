@@ -57,7 +57,7 @@ namespace GameCore.InGame.TileSystem.Managers
 
         internal AnswerTileController GetAnswerTileController(TileController tileController)
         {
-            return _answerTileControllers.FirstOrDefault(x => x.GetState() == TileEmptyState.Filled && x.GetCharacter() == tileController.GetCharacter());
+            return _answerTileControllers.FirstOrDefault(x => x.GetState() == TileEmptyState.Filled && x.GetCurrentTileController() == tileController);
         }
 
         internal bool IsAnswerTilesFull()

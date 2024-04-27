@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using GameCore.InGame.TileSystem.Controllers;
@@ -27,6 +28,7 @@ namespace GameCore.TileSystem.Managers
             {
                 var tileController = Instantiate(_tilePrefab, _currentTilesParent);
                 tileController.Setup(tile.character, TileState.NotUsing, tile.position);
+                tileController.SetTileLayer(0);
                 return tileController;
             }));
 
@@ -39,23 +41,30 @@ namespace GameCore.TileSystem.Managers
                     _tempTiles[childId].SetTileState(TileState.Locked);
                 }
             }
+
+            SetTileLayers(_tempTiles);
         }
 
-        private LevelTileData[] GetParentTiles(LevelTileData[] levelTileDatas)
+        private void SetTileLayers(List<TileController> tiles)
         {
-            return levelTileDatas.Where(tile => levelTileDatas.All(data => !data.children.Contains(tile.id))).ToArray();
+            int layer = 0;
+            foreach (var tile in tiles)
+            {
+                if (tile.GetTileElements().GetParentTiles().Count == 0)
+                {
+                    tile.SetTileLayer(layer);
+                    SetChildLayers(tile, layer + 1);
+                }
+            }
         }
 
-        private LevelTileData[] GetChildTiles(LevelTileData[] levelTileDatas)
+        private void SetChildLayers(TileController tile, int v)
         {
-            return levelTileDatas.Where(data => data.children.Length > 0)
-                                .SelectMany(data => data.children.Select(id => GetLevelTileDataFromChild(id, levelTileDatas)))
-                                .ToArray();
-        }
-
-        private LevelTileData GetLevelTileDataFromChild(int id, LevelTileData[] levelTileDatas)
-        {
-            return levelTileDatas.FirstOrDefault(data => data.id == id);
+            foreach (var child in tile.GetTileElements().GetChildTiles())
+            {
+                child.SetTileLayer(v);
+                SetChildLayers(child, v + 1);
+            }
         }
     }
 }

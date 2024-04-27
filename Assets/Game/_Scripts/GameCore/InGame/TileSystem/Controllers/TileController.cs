@@ -58,6 +58,7 @@ namespace GameCore.InGame.TileSystem.Controllers
         public void SetTileOnActionState(TileOnActionState state) => _tileElements.TileOnActionState = state;
         public void SetTileEmptyState(TileEmptyState state) => _tileElements.TileEmptyState = state;
         public void SetTileType(TileType type) => _tileElements.TileType = type;
+        public void SetTileLayer(int layer) => _tileElements.Layer = layer;
         public void SetTileState(TileState state)
         {
             _tileElements.TileState = state;

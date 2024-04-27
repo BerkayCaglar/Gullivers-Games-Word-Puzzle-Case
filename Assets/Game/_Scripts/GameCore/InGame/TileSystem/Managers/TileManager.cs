@@ -69,17 +69,31 @@ namespace GameCore.TileSystem.Managers
             var TLC = ATC.GetCurrentTileController();
             if (TLC == null) return;
 
-            ATC.RemoveCurrentTileController();
-            ATC.SetTileEmptyState(TileEmptyState.Empty);
+            var allChildTiles = ATC.GetCurrentTileController().GetTileElements().GetAllChildTiles();
+            allChildTiles.Add(TLC);
 
-            TLC.transform.SetParent(TLC.GetInit().GetParent());
-            TLC.SetTileState(TileState.NotUsing);
-            TLC.SetChildTiles();
-            TLC.SetTileOnActionState(TileOnActionState.OnAction);
-            ATC.SetTileOnActionState(TileOnActionState.OnAction);
-            await PlayMoveAnimation(TLC.transform, TLC.GetInit().GetPosition(), TLC.GetInit().GetScale(), useLocalMove: true, useVFX: false);
-            TLC.SetTileOnActionState(TileOnActionState.None);
-            ATC.SetTileOnActionState(TileOnActionState.None);
+            allChildTiles = allChildTiles.OrderBy(x => x.GetTileElements().GetLayer()).ToList();
+            allChildTiles.Reverse();
+
+            foreach (var localTLC in allChildTiles)
+            {
+                if (localTLC.GetTileState() == TileState.Locked || localTLC.GetTileState() == TileState.NotUsing || localTLC.GetTileOnActionState() == TileOnActionState.OnAction) continue;
+
+                var localATC = AnswerTilesManager.Instance.GetAnswerTileController(localTLC);
+                if (localATC == null) continue;
+
+                localATC.RemoveCurrentTileController();
+                localTLC.SetTileEmptyState(TileEmptyState.Empty);
+
+                localTLC.transform.SetParent(localTLC.GetInit().GetParent());
+                localTLC.SetTileState(TileState.NotUsing);
+                localTLC.SetChildTiles();
+                localTLC.SetTileOnActionState(TileOnActionState.OnAction);
+                localTLC.SetTileOnActionState(TileOnActionState.OnAction);
+                await PlayMoveAnimation(localTLC.transform, localTLC.GetInit().GetPosition(), localTLC.GetInit().GetScale(), useLocalMove: true, useVFX: false);
+                localTLC.SetTileOnActionState(TileOnActionState.None);
+                localATC.SetTileOnActionState(TileOnActionState.None);
+            }
         }
 
         private async Task PlayMoveAnimation(Transform obj, Vector3 targetPos, Vector3 targetScale, bool useLocalMove, bool useVFX)
