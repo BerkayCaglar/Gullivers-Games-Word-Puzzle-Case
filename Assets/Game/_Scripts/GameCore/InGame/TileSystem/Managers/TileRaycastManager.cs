@@ -10,6 +10,8 @@ namespace GameCore.TileSystem.Managers
         private Camera _camera;
         private bool _isTouching = false;
 
+        public static bool LockTouch { get; set; } = false;
+
         private void Start()
         {
             _camera = Camera.main;
@@ -17,6 +19,7 @@ namespace GameCore.TileSystem.Managers
 
         private void Update()
         {
+            if (LockTouch) return;
             if (!_isTouching && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
             {
                 _isTouching = true;

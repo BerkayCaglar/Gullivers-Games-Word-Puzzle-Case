@@ -77,12 +77,13 @@ namespace GameCore.TileSystem.Managers
 
             foreach (var localTLC in allChildTiles)
             {
+                TileRaycastManager.LockTouch = true;
                 if (localTLC.GetTileState() == TileState.Locked || localTLC.GetTileState() == TileState.NotUsing || localTLC.GetTileOnActionState() == TileOnActionState.OnAction) continue;
 
                 var localATC = AnswerTilesManager.Instance.GetAnswerTileController(localTLC);
                 if (localATC == null) continue;
 
-                localATC.RemoveCurrentTileController();
+                AnswerTilesManager.Instance.RemoveAnswerTileController(localATC);
                 localTLC.SetTileEmptyState(TileEmptyState.Empty);
 
                 localTLC.transform.SetParent(localTLC.GetInit().GetParent());
@@ -93,6 +94,7 @@ namespace GameCore.TileSystem.Managers
                 await PlayMoveAnimation(localTLC.transform, localTLC.GetInit().GetPosition(), localTLC.GetInit().GetScale(), useLocalMove: true, useVFX: false);
                 localTLC.SetTileOnActionState(TileOnActionState.None);
                 localATC.SetTileOnActionState(TileOnActionState.None);
+                TileRaycastManager.LockTouch = false;
             }
         }
 
