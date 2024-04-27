@@ -6,6 +6,10 @@ using UnityEngine;
 using DG.Tweening;
 using GameCore.TileSystem.Controllers;
 using System.Threading.Tasks;
+using MyBox;
+using GameCore.PopupSystem.VFXPoolSystem;
+using GameCore.CameraSystem;
+using System.Linq;
 
 namespace GameCore.TileSystem.Managers
 {
@@ -23,8 +27,8 @@ namespace GameCore.TileSystem.Managers
 
         private void OnClickTile(ITile ITile)
         {
-            Debug.Log($"TileManager: {ITile.GetTileTransform().name} clicked!");
-
+            if (ITile.GetTileOnActionState() == TileOnActionState.OnAction) return;
+            SendLog(ITile);
             switch (ITile.GetTileType())
             {
                 case TileType.Tile:
@@ -39,13 +43,24 @@ namespace GameCore.TileSystem.Managers
         private async void GoingTLC(TileController TLC)
         {
             if (TLC == null) return;
+
+            if (AnswerTilesManager.Instance.IsAnswerTilesFull())
+            {
+                await PlayFullAnimation(AnswerTilesManager.Instance.transform);
+                return;
+            }
+
             var ATC = AnswerTilesManager.Instance.SetAnswerTileController(TLC);
             if (ATC == null) return;
 
+            TLC.transform.SetParent(ATC.transform);
             TLC.SetTileState(TileState.Using);
+            TLC.SetChildTiles();
             TLC.SetTileOnActionState(TileOnActionState.OnAction);
-            await PlayMoveAnimation(TLC.transform, ATC.transform);
+            ATC.SetTileOnActionState(TileOnActionState.OnAction);
+            await PlayMoveAnimation(TLC.transform, Vector3.zero, Vector3.one, useLocalMove: true, useVFX: true);
             TLC.SetTileOnActionState(TileOnActionState.None);
+            ATC.SetTileOnActionState(TileOnActionState.None);
         }
 
         private async void GoingATC(AnswerTileController ATC)
@@ -57,24 +72,73 @@ namespace GameCore.TileSystem.Managers
             ATC.RemoveCurrentTileController();
             ATC.SetTileEmptyState(TileEmptyState.Empty);
 
+            TLC.transform.SetParent(TLC.GetInit().GetParent());
             TLC.SetTileState(TileState.NotUsing);
+            TLC.SetChildTiles();
             TLC.SetTileOnActionState(TileOnActionState.OnAction);
-            await PlayMoveAnimation(TLC.transform, TLC.GetInit());
+            ATC.SetTileOnActionState(TileOnActionState.OnAction);
+            await PlayMoveAnimation(TLC.transform, TLC.GetInit().GetPosition(), TLC.GetInit().GetScale(), useLocalMove: true, useVFX: false);
             TLC.SetTileOnActionState(TileOnActionState.None);
+            ATC.SetTileOnActionState(TileOnActionState.None);
         }
 
-        private async Task PlayMoveAnimation(Transform obj, Transform target)
+        private async Task PlayMoveAnimation(Transform obj, Vector3 targetPos, Vector3 targetScale, bool useLocalMove, bool useVFX)
         {
-            await obj.DOPunchScale(Vector3.one * 0.1f, 0.1f).OnComplete(() =>
+            await obj.DOPunchScale(Vector3.one * 0.1f, 0.1f).AsyncWaitForCompletion();
+
+            switch (useLocalMove)
             {
-                obj.DOMove(target.position, 0.1f).OnComplete(() =>
-                {
-                    obj.DOScale(target.localScale, 0.1f).OnComplete(() =>
-                    {
-                        obj.DOPunchScale(Vector3.one * 0.1f, 0.1f);
-                    });
-                });
-            }).AsyncWaitForCompletion();
+                case true:
+                    await obj.DOLocalJump(targetPos, UnityEngine.Random.Range(0.1f, 0.2f), UnityEngine.Random.Range(1, 2), 0.1f).SetEase(Ease.InOutQuad).AsyncWaitForCompletion();
+                    break;
+                case false:
+                    await obj.DOJump(targetPos, UnityEngine.Random.Range(0.1f, 0.2f), UnityEngine.Random.Range(1, 2), 0.1f).SetEase(Ease.InOutQuad).AsyncWaitForCompletion();
+                    break;
+            }
+
+            if (useVFX)
+            {
+                VFXPooler.Instance.SpawnFromPool(VFXType.PuffVFX, obj.position, 0.5f);
+                float[] randoms = Enumerable.Range(0, 3)
+                    .Select(_ => UnityEngine.Random.Range(0.1f, 0.2f))
+                    .ToArray();
+                CameraShaker.ShakeCamera(new Vector3(randoms[0], randoms[1], randoms[2]));
+            }
+
+            await obj.DOScale(targetScale, 0.1f).AsyncWaitForCompletion();
+            await obj.DOPunchScale(Vector3.one * 0.1f, 0.1f).AsyncWaitForCompletion();
+
+            obj.localScale = targetScale;
+        }
+
+        private Tween _fullAnimation = null;
+        private async Task PlayFullAnimation(Transform obj)
+        {
+            if (_fullAnimation != null)
+            {
+                _fullAnimation.Kill();
+                _fullAnimation = null;
+                obj.localScale = Vector3.one;
+            }
+
+            _fullAnimation = obj.DOPunchScale(Vector3.one * 0.1f, 0.1f);
+            _fullAnimation.OnComplete(() => _fullAnimation = null);
+            await _fullAnimation.AsyncWaitForCompletion();
+        }
+
+        private void SendLog(ITile ITile)
+        {
+            Debug.Log($"<color=green>[TILE MANAGER]</color> Clicked Tile: <color=yellow>{ITile.GetTileTransform().name}</color>");
+
+            /*
+            // FOR DEBUGGING
+            Debug.Log($"<color=yellow> --------------------- </color>");
+
+            Debug.Log($"<color=green>[TILE MANAGER]</color> Tile State: <color=yellow>{ITile.GetTileState()}</color>");
+            Debug.Log($"<color=green>[TILE MANAGER]</color> Tile Type: <color=yellow>{ITile.GetTileType()}</color>");
+            Debug.Log($"<color=green>[TILE MANAGER]</color> Tile Empty State: <color=yellow>{ITile.GetTileEmptyState()}</color>");
+            Debug.Log($"<color=green>[TILE MANAGER]</color> Tile On Action State: <color=yellow>{ITile.GetTileOnActionState()}</color>");
+            */
         }
     }
 }

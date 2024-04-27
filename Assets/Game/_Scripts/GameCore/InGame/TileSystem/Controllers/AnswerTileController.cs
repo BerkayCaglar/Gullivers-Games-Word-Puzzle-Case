@@ -49,12 +49,11 @@ namespace GameCore.TileSystem.Controllers
 
         Transform ITile.GetTileTransform() => transform;
 
-        TileState ITile.GetTileState() => _answerTileElements.GetTileState();
-        TileType ITile.GetTileType() => _answerTileElements.GetTileType();
-        TileEmptyState ITile.GetTileEmptyState() => _answerTileElements.GetTileEmptyState();
-        TileOnActionState ITile.GetTileOnActionState() => _answerTileElements.GetTileOnActionState();
-
-        internal TileEmptyState GetState() => _answerTileElements.GetTileEmptyState();
+        public TileState GetTileState() => _answerTileElements.GetTileState();
+        public TileType GetTileType() => _answerTileElements.GetTileType();
+        public TileEmptyState GetTileEmptyState() => _answerTileElements.GetTileEmptyState();
+        public TileOnActionState GetTileOnActionState() => _answerTileElements.GetTileOnActionState();
+        public TileEmptyState GetState() => _answerTileElements.GetTileEmptyState();
 
         internal TileController GetCurrentTileController() => _answerTileElements.GetCurrentTileController();
 

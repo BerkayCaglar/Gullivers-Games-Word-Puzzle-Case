@@ -15,13 +15,11 @@ namespace GameCore.InGame.TileSystem.Managers
     {
         [SerializeField] private AnswerTileController[] _answerTileControllers;
 
-        [SerializeField] private TileState _tileState = TileState.Locked;
-
         internal AnswerTileController SetAnswerTileController(TileController tileController)
         {
             for (int i = 0; i < _answerTileControllers.Length; i++)
             {
-                if (_answerTileControllers[i].GetState() == TileEmptyState.Empty)
+                if (_answerTileControllers[i].GetState() == TileEmptyState.Empty && _answerTileControllers[i].GetTileOnActionState() == TileOnActionState.None)
                 {
                     _answerTileControllers[i].SetCurrentTileController(tileController);
                     return _answerTileControllers[i];
@@ -60,6 +58,11 @@ namespace GameCore.InGame.TileSystem.Managers
         internal AnswerTileController GetAnswerTileController(TileController tileController)
         {
             return _answerTileControllers.FirstOrDefault(x => x.GetState() == TileEmptyState.Filled && x.GetCharacter() == tileController.GetCharacter());
+        }
+
+        internal bool IsAnswerTilesFull()
+        {
+            return _answerTileControllers.All(x => x.GetState() == TileEmptyState.Filled);
         }
 
         [ButtonMethod]

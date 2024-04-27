@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using GameCore.TileSystem.Architecture;
 using TMPro;
 using UnityEngine;
@@ -9,7 +10,6 @@ namespace GameCore.InGame.TileSystem.Controllers
     public class TileController : MonoBehaviour, ITile
     {
         [SerializeField] private TextMeshPro _characterText;
-        [SerializeField] private Image _tileBackground;
         [SerializeField] private SpriteRenderer _tileSpriteRenderer;
 
         private TileElements _tileElements = new()
@@ -17,7 +17,7 @@ namespace GameCore.InGame.TileSystem.Controllers
             ChildTiles = new List<TileController>(),
             ParentTiles = new List<TileController>(),
             Character = string.Empty,
-            InitialTransform = null,
+            InitialValues = new TileElements._InitialValues(null, Vector3.zero, Vector3.zero),
             TileState = TileState.Locked,
             TileType = TileType.Tile,
             TileEmptyState = TileEmptyState.Filled,
@@ -31,7 +31,7 @@ namespace GameCore.InGame.TileSystem.Controllers
 
             _tileElements.Character = character;
             _tileElements.TileState = tileState;
-            _tileElements.InitialTransform = transform;
+            _tileElements.InitialValues = new TileElements._InitialValues(transform.parent, transform.localPosition, transform.localScale);
         }
 
         #region Getters
@@ -39,15 +39,17 @@ namespace GameCore.InGame.TileSystem.Controllers
         internal void AddChild(TileController tileController) => _tileElements.ChildTiles.Add(tileController);
         internal void AddParent(TileController tileController) => _tileElements.ParentTiles.Add(tileController);
 
-        internal Transform GetInit() => _tileElements.GetInitialTransform();
+        internal TileElements._InitialValues GetInit() => _tileElements.GetInitialValues();
         internal string GetCharacter() => _tileElements.GetCharacter();
 
-        TileState ITile.GetTileState() => _tileElements.GetTileState();
-        TileType ITile.GetTileType() => _tileElements.GetTileType();
-        TileEmptyState ITile.GetTileEmptyState() => _tileElements.GetTileEmptyState();
-        TileOnActionState ITile.GetTileOnActionState() => _tileElements.GetTileOnActionState();
+        public TileState GetTileState() => _tileElements.GetTileState();
+        public TileType GetTileType() => _tileElements.GetTileType();
+        public TileEmptyState GetTileEmptyState() => _tileElements.GetTileEmptyState();
+        public TileOnActionState GetTileOnActionState() => _tileElements.GetTileOnActionState();
 
         Transform ITile.GetTileTransform() => transform;
+
+        internal TileElements GetTileElements() => _tileElements;
 
         #endregion
 
@@ -61,16 +63,57 @@ namespace GameCore.InGame.TileSystem.Controllers
             _tileElements.TileState = state;
             SetTileVisuals();
         }
+
+        private Tween _colorTween = null;
         private void SetTileVisuals()
         {
             switch (_tileElements.GetTileState())
             {
                 case TileState.Locked:
-                    _tileSpriteRenderer.color = Color.gray;
+                    if (_colorTween != null)
+                    {
+                        _colorTween.Kill();
+                        _colorTween = null;
+                        _tileSpriteRenderer.color = new Color(1, 0.95f, 0.65f, 1);
+                    }
+                    _colorTween = DOTween.To(() => _tileSpriteRenderer.color, x => _tileSpriteRenderer.color = x, Color.gray, 0.1f);
+                    _colorTween.OnComplete(() => _colorTween = null);
                     break;
                 case TileState.NotUsing:
-                    _tileSpriteRenderer.color = new Color(1, 0.95f, 0.65f, 1);
+                    if (_colorTween != null)
+                    {
+                        _colorTween.Kill();
+                        _colorTween = null;
+                        _tileSpriteRenderer.color = Color.gray;
+                    }
+                    _colorTween = DOTween.To(() => _tileSpriteRenderer.color, x => _tileSpriteRenderer.color = x, new Color(1, 0.95f, 0.65f, 1), 0.2f).SetEase(Ease.InCubic);
+                    _colorTween.OnComplete(() => _colorTween = null);
                     break;
+            }
+        }
+
+        internal void SetChildTiles()
+        {
+            TileState currentState = _tileElements.GetTileState();
+
+            foreach (var child in _tileElements.GetAllChildTiles())
+            {
+                if (currentState == TileState.Using)
+                {
+                    //Debug.Log($"<color=red>[TILE MANAGER]</color> Child: <color=yellow>{child.GetCharacter()}</color>");
+                    child._tileElements.ParentTiles.Remove(this);
+
+                    if (child._tileElements.GetParentTiles().Count == 0)
+                        child.SetTileState(TileState.NotUsing);
+                }
+                else if (currentState == TileState.NotUsing)
+                {
+                    //Debug.Log($"<color=green>[TILE MANAGER]</color> Child: <color=yellow>{child.GetCharacter()}</color>");
+                    child._tileElements.ParentTiles.Add(this);
+
+                    if (child._tileElements.GetParentTiles().Count > 0)
+                        child.SetTileState(TileState.Locked);
+                }
             }
         }
 

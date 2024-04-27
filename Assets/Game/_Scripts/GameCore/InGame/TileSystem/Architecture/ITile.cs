@@ -6,10 +6,10 @@ namespace GameCore.TileSystem.Architecture
     {
         internal Transform GetTileTransform();
 
-        internal TileState GetTileState();
-        internal TileType GetTileType();
-        internal TileEmptyState GetTileEmptyState();
-        internal TileOnActionState GetTileOnActionState();
+        public TileState GetTileState();
+        public TileType GetTileType();
+        public TileEmptyState GetTileEmptyState();
+        public TileOnActionState GetTileOnActionState();
 
         public void SetTileOnActionState(TileOnActionState state);
         public void SetTileState(TileState state);
