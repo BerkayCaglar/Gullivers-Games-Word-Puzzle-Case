@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using DG.Tweening;
 using GameCore.InGame.TileSystem.Controllers;
 using GameCore.TileSystem.Architecture;
 using UnityEngine;
@@ -43,6 +44,19 @@ namespace GameCore.TileSystem.Controllers
                     Debug.LogError(string.Format(AnswerTileElements.CHARACTER_STATE_ERROR, gameObject.name));
                     return string.Empty;
             }
+        }
+
+        internal void Shake()
+        {
+            StopShake();
+            if (GetState() == TileEmptyState.Empty) return;
+            transform.DOPunchScale(Vector3.one * 0.03f, 0.5f).SetLoops(-1, LoopType.Yoyo);
+        }
+
+        internal void StopShake()
+        {
+            transform.DOKill();
+            transform.localScale = new Vector3(0.4f, 0.4f, 0.4f);
         }
 
         #region Getters

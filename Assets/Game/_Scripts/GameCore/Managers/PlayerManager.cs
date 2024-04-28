@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GameCore.SingletonSystem;
+using MyBox;
 
 namespace GameCore.Managers
 {
@@ -34,6 +35,13 @@ namespace GameCore.Managers
         public bool IsCurrentPlayerLevelEnoughToUnlockLevel(int level)
         {
             return CurrentPlayerLevel >= level;
+        }
+
+        [ButtonMethod]
+        public void ResetPlayerData()
+        {
+            CurrentPlayerLevel = 1;
+            CurrentPlayingLevel = 0;
         }
     }
 }

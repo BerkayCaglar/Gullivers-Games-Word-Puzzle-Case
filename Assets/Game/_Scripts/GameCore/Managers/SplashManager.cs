@@ -4,7 +4,7 @@ using GameCore.LevelSystem;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
-using GameCore.HighScoreSystem;
+using GameCore.ScoreSystem;
 
 namespace GameCore.Managers
 {

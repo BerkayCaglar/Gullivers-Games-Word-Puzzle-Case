@@ -93,6 +93,7 @@ namespace GameCore.PopupSystem
     [Serializable]
     public enum PopupType
     {
-        LevelsPopup
+        LevelsPopup,
+        SettingsPopup
     }
 }

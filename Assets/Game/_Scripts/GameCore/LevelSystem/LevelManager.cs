@@ -20,7 +20,7 @@ namespace GameCore.LevelSystem
 
         public LevelData GetLevelData(int level)
         {
-            return levels[level];
+            return levels[level - 1];
         }
 
         public int GetLevelCount()

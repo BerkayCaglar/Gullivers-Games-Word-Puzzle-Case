@@ -6,7 +6,7 @@ using GameCore.SingletonSystem;
 using MyBox;
 using UnityEngine;
 
-namespace GameCore.HighScoreSystem
+namespace GameCore.ScoreSystem
 {
     [CreateAssetMenu(fileName = "HighScoreManager", menuName = "ScriptableObjects/HighScoreManager", order = 1)]
     public class HighScoreManager : ScriptableResourceSingleton<HighScoreManager>
@@ -18,21 +18,21 @@ namespace GameCore.HighScoreSystem
             int score = highScoreData.score;
             int level = highScoreData.level;
 
-            var highScore = highScores.FirstOrDefault(x => x.level == level);
-            if (highScore.Equals(default(HighScoreData)))
+            var levelHighScoreData = highScores.FirstOrDefault(x => x.level == level);
+            if (levelHighScoreData.Equals(default(HighScoreData)))
             {
-                highScore = new HighScoreData
-                {
-                    level = level,
-                    score = score
-                };
-                highScores = highScores.Append(highScore).ToList();
+                Debug.LogError("Level not found in highScores list");
+                return;
             }
             else
             {
-                if (score > highScore.score)
+                Debug.Log($"Level Score: {levelHighScoreData.score} - Your Score: {score}");
+                if (score > levelHighScoreData.score)
                 {
-                    highScore.score = score;
+                    Debug.Log("New High Score!");
+                    highScores.Remove(levelHighScoreData);
+                    highScores.Add(highScoreData);
+                    highScores = highScores.OrderByDescending(x => x.score).ToList();
                 }
             }
         }
@@ -73,6 +73,17 @@ namespace GameCore.HighScoreSystem
                     .Where(x => levelDatas.All(levelData => x.level != levelData.levelPoint)))
                     .ToList();
             }
+        }
+
+        [ButtonMethod]
+        public void ResetHighScores()
+        {
+            var convertedList = highScores.Select(x => new HighScoreData
+            {
+                level = x.level,
+                score = 0
+            }).ToList();
+            highScores = convertedList;
         }
     }
 }

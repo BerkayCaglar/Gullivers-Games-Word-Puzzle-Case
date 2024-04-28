@@ -1,9 +1,9 @@
 using System.Collections;
 using System.Linq;
 using System.Text;
-using DG.Tweening;
+using GameCore.AnimationSystem;
+using GameCore.GameFlowSystem;
 using GameCore.InGame.TileSystem.Controllers;
-using GameCore.PopupSystem.VFXPoolSystem;
 using GameCore.SingletonSystem;
 using GameCore.TileSystem.Architecture;
 using GameCore.TileSystem.Controllers;
@@ -20,14 +20,25 @@ namespace GameCore.InGame.TileSystem.Managers.Answer
         #region Events
         private void Start()
         {
-            TileActions.OnAnswerCheck += OnAnswerCheck;
-            TileActions.OnScoreChanged += OnScoreChanged;
+            GameActions.OnAnswerCheck += OnAnswerCheck;
+            GameActions.OnScoreChanged += OnScoreChanged;
+            GameActions.OnGameOver += OnGameOver;
         }
 
         private void OnDestroy()
         {
-            TileActions.OnAnswerCheck -= OnAnswerCheck;
-            TileActions.OnScoreChanged -= OnScoreChanged;
+            GameActions.OnAnswerCheck -= OnAnswerCheck;
+            GameActions.OnScoreChanged -= OnScoreChanged;
+            GameActions.OnGameOver -= OnGameOver;
+        }
+
+        private async void OnGameOver()
+        {
+            foreach (var answerTileController in _answerTileControllers.Reverse())
+            {
+                answerTileController.StopShake();
+                await AnimationsManager.PlayExplosionAnimation(answerTileController.transform);
+            }
         }
 
         private void OnAnswerCheck(bool isCorrect)
@@ -35,40 +46,42 @@ namespace GameCore.InGame.TileSystem.Managers.Answer
             ShakeAnswerTiles(isCorrect);
         }
 
-        private Tween _shakeTween;
         private void ShakeAnswerTiles(bool isCorrect)
         {
             switch (isCorrect)
             {
                 case true:
-                    if (_shakeTween != null) return;
-                    _shakeTween = transform.DOShakePosition(0.5f, 0.02f, 50, 90, false, true).SetLoops(-1, LoopType.Yoyo);
+                    ShakeAnswerTiles(true);
                     break;
                 case false:
-                    if (_shakeTween != null)
-                    {
-                        _shakeTween.Kill();
-                        _shakeTween = null;
-                    }
+                    ShakeAnswerTiles(false);
                     break;
+            }
+
+            void ShakeAnswerTiles(bool shake)
+            {
+                _answerTileControllers.ForEach(x =>
+                {
+                    if (shake)
+                        x.Shake();
+                    else
+                        x.StopShake();
+                });
             }
         }
 
         private async void OnScoreChanged(int score)
         {
-            _shakeTween?.Kill();
-            _shakeTween = null;
+            if (score <= 0) return;
 
             TileRaycastManager.LockTouch = true;
             foreach (var answerTileController in _answerTileControllers.Reverse())
             {
+                answerTileController.StopShake();
                 var TLC = answerTileController.GetCurrentTileController();
                 if (TLC == null) continue;
                 TLC.SetTileState(TileState.Used);
-                VFXPooler.Instance.SpawnFromPool(VFXType.ConfettiBurstVFX, TLC.transform.position, Quaternion.identity, 0.5f);
-                await TLC.transform.DOPunchScale(Vector3.one * 0.1f, 0.1f).AsyncWaitForCompletion();
-                await TLC.transform.DOScale(Vector3.zero, 0.1f).AsyncWaitForCompletion();
-                TLC.gameObject.SetActive(false);
+                await AnimationsManager.PlayExplosionAnimation(TLC.transform);
             }
 
             ResetAnswerTiles();

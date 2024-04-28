@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameCore.HighScoreSystem
+namespace GameCore.ScoreSystem
 {
     [System.Serializable]
     public struct HighScoreData

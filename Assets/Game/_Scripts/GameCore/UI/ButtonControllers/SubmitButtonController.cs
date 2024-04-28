@@ -1,5 +1,5 @@
+using GameCore.GameFlowSystem;
 using GameCore.InGame.TileSystem.Managers.Answer;
-using GameCore.TileSystem.Architecture;
 using GameCore.TileSystem.Managers;
 using UnityEngine;
 using UnityEngine.UI;
@@ -13,12 +13,12 @@ namespace GameCore.UI.ButtonControllers
         private void Awake()
         {
             _button = GetComponent<Button>();
-            TileActions.OnAnswerCheck += OnAnswerCheck;
+            GameActions.OnAnswerCheck += OnAnswerCheck;
         }
 
         private void OnDestroy()
         {
-            TileActions.OnAnswerCheck -= OnAnswerCheck;
+            GameActions.OnAnswerCheck -= OnAnswerCheck;
         }
 
         private void OnAnswerCheck(bool isCorrect)
@@ -42,9 +42,9 @@ namespace GameCore.UI.ButtonControllers
             if (string.IsNullOrEmpty(answer))
                 return;
 
+            _button.interactable = false;
             var score = TileScoreManager.GetWordScore(answer);
-            Debug.Log($"Score: {score} for '{answer}'");
-            TileActions.SubmitAnswer(score);
+            GameActions.SubmitAnswer(score);
         }
     }
 }

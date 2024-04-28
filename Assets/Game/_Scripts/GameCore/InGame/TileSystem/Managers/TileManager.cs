@@ -1,14 +1,10 @@
 using GameCore.InGame.TileSystem.Controllers;
 using GameCore.TileSystem.Architecture;
 using UnityEngine;
-using DG.Tweening;
 using GameCore.TileSystem.Controllers;
-using System.Threading.Tasks;
-using MyBox;
-using GameCore.PopupSystem.VFXPoolSystem;
-using GameCore.CameraSystem;
 using System.Linq;
 using GameCore.InGame.TileSystem.Managers.Answer;
+using GameCore.AnimationSystem;
 
 namespace GameCore.TileSystem.Managers
 {
@@ -45,19 +41,20 @@ namespace GameCore.TileSystem.Managers
 
             if (AnswerTilesManager.Instance.IsAnswerTilesFull())
             {
-                await PlayFullAnimation(AnswerTilesManager.Instance.transform);
+                await AnimationsManager.PlayPunchAnimation(AnswerTilesManager.Instance.transform);
                 return;
             }
+
+            TLC.SetTileState(TileState.Using);
+            TLC.SetChildTiles();
 
             var ATC = AnswerTilesManager.Instance.SetAnswerTileController(TLC);
             if (ATC == null) return;
 
             TLC.transform.SetParent(ATC.transform);
-            TLC.SetTileState(TileState.Using);
-            TLC.SetChildTiles();
             TLC.SetTileOnActionState(TileOnActionState.OnAction);
             ATC.SetTileOnActionState(TileOnActionState.OnAction);
-            await PlayMoveAnimation(TLC.transform, Vector3.zero, Vector3.one, useLocalMove: true, useVFX: true);
+            await AnimationsManager.PlayMoveAnimation(TLC.transform, Vector3.zero, Vector3.one, useLocalMove: true, useVFX: true);
             TLC.SetTileOnActionState(TileOnActionState.None);
             ATC.SetTileOnActionState(TileOnActionState.None);
         }
@@ -74,71 +71,27 @@ namespace GameCore.TileSystem.Managers
             allChildTiles = allChildTiles.OrderBy(x => x.GetTileElements().GetLayer()).ToList();
             allChildTiles.Reverse();
 
+            TileRaycastManager.LockTouch = true;
             foreach (var localTLC in allChildTiles)
             {
-                TileRaycastManager.LockTouch = true;
                 if (localTLC.GetTileState() == TileState.Locked || localTLC.GetTileState() == TileState.NotUsing || localTLC.GetTileOnActionState() == TileOnActionState.OnAction) continue;
 
                 var localATC = AnswerTilesManager.Instance.GetAnswerTileController(localTLC);
                 if (localATC == null) continue;
 
-                AnswerTilesManager.Instance.RemoveAnswerTileController(localATC);
-                localTLC.SetTileEmptyState(TileEmptyState.Empty);
-
                 localTLC.transform.SetParent(localTLC.GetInit().GetParent());
                 localTLC.SetTileState(TileState.NotUsing);
                 localTLC.SetChildTiles();
+
+                AnswerTilesManager.Instance.RemoveAnswerTileController(localATC);
+
                 localTLC.SetTileOnActionState(TileOnActionState.OnAction);
                 localTLC.SetTileOnActionState(TileOnActionState.OnAction);
-                await PlayMoveAnimation(localTLC.transform, localTLC.GetInit().GetPosition(), localTLC.GetInit().GetScale(), useLocalMove: true, useVFX: false);
+                await AnimationsManager.PlayMoveAnimation(localTLC.transform, localTLC.GetInit().GetPosition(), localTLC.GetInit().GetScale(), useLocalMove: true, useVFX: false);
                 localTLC.SetTileOnActionState(TileOnActionState.None);
                 localATC.SetTileOnActionState(TileOnActionState.None);
-                TileRaycastManager.LockTouch = false;
             }
-        }
-
-        private async Task PlayMoveAnimation(Transform obj, Vector3 targetPos, Vector3 targetScale, bool useLocalMove, bool useVFX)
-        {
-            await obj.DOPunchScale(Vector3.one * 0.1f, 0.1f).AsyncWaitForCompletion();
-
-            switch (useLocalMove)
-            {
-                case true:
-                    await obj.DOLocalJump(targetPos, UnityEngine.Random.Range(0.1f, 0.2f), UnityEngine.Random.Range(1, 2), 0.1f).SetEase(Ease.InOutQuad).AsyncWaitForCompletion();
-                    break;
-                case false:
-                    await obj.DOJump(targetPos, UnityEngine.Random.Range(0.1f, 0.2f), UnityEngine.Random.Range(1, 2), 0.1f).SetEase(Ease.InOutQuad).AsyncWaitForCompletion();
-                    break;
-            }
-
-            if (useVFX)
-            {
-                VFXPooler.Instance.SpawnFromPool(VFXType.PuffVFX, obj.position, 0.5f);
-                float[] randoms = Enumerable.Range(0, 3)
-                    .Select(_ => UnityEngine.Random.Range(0.1f, 0.2f))
-                    .ToArray();
-                CameraShaker.ShakeCamera(new Vector3(randoms[0], randoms[1], randoms[2]));
-            }
-
-            await obj.DOScale(targetScale, 0.1f).AsyncWaitForCompletion();
-            await obj.DOPunchScale(Vector3.one * 0.1f, 0.1f).AsyncWaitForCompletion();
-
-            obj.localScale = targetScale;
-        }
-
-        private Tween _fullAnimation = null;
-        private async Task PlayFullAnimation(Transform obj)
-        {
-            if (_fullAnimation != null)
-            {
-                _fullAnimation.Kill();
-                _fullAnimation = null;
-                obj.localScale = Vector3.one;
-            }
-
-            _fullAnimation = obj.DOPunchScale(Vector3.one * 0.1f, 0.1f);
-            _fullAnimation.OnComplete(() => _fullAnimation = null);
-            await _fullAnimation.AsyncWaitForCompletion();
+            TileRaycastManager.LockTouch = false;
         }
 
         private void SendLog(ITile ITile)

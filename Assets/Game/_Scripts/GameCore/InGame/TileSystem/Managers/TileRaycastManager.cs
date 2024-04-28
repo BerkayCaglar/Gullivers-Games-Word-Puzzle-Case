@@ -1,3 +1,4 @@
+using GameCore.GameFlowSystem;
 using GameCore.TileSystem.Architecture;
 using UnityEngine;
 
@@ -8,15 +9,28 @@ namespace GameCore.TileSystem.Managers
         private Camera _camera;
         private bool _isTouching = false;
 
-        public static bool LockTouch { get; set; } = false;
+        private static bool _lockTouch = false;
+
+        public static bool LockTouch
+        {
+            get => _lockTouch;
+            set
+            {
+                Debug.Log($"LockTouch Setted to {value}");
+                _lockTouch = value;
+            }
+        }
 
         private void Start()
         {
             _camera = Camera.main;
+            GameActions.OnGameOver += () => LockTouch = true;
+            LockTouch = false;
         }
 
         private void Update()
         {
+            if (GameManager.GetGameState() == GameState.GameOver) return;
             if (LockTouch) return;
             if (!_isTouching && Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
             {

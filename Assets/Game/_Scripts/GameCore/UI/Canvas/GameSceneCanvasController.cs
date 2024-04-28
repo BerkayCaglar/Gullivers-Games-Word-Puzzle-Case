@@ -1,21 +1,14 @@
-using System;
-using System.Linq;
+using System.Threading.Tasks;
 using DG.Tweening;
-using GameCore.HighScoreSystem;
-using GameCore.InGame.TileSystem;
-using GameCore.InGame.TileSystem.Managers;
+using GameCore.GameFlowSystem;
 using GameCore.InGame.TileSystem.Managers.Answer;
 using GameCore.LevelSystem;
 using GameCore.Managers;
 using GameCore.PopupSystem;
-using GameCore.TileSystem;
+using GameCore.ScoreSystem;
 using GameCore.TileSystem.Architecture;
-using GameCore.TileSystem.Controllers;
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.UI;
 
 namespace GameCore.UI.Canvas
 {
@@ -25,24 +18,46 @@ namespace GameCore.UI.Canvas
         [SerializeField] private GameObject _submitArea;
 
         [SerializeField] private TextMeshProUGUI _scoreText;
+        [SerializeField] private TextMeshProUGUI _titleText;
+
+        [SerializeField] private Animator _gameOverAnimator;
 
         public override void OnOpenPanel()
         {
+            _titleText.text = $"{LevelManager.Instance.GetLevelData(PlayerManager.Instance.GetCurrentPlayingLevel()).title}";
             _scoreText.text = $"0";
             TileActions.OnAnswerTilesChanged += OnAnswerTilesChanged;
-            TileActions.OnScoreChanged += OnScoreChanged;
+            GameActions.OnScoreChanged += OnScoreChanged;
+            GameActions.OnSubmitAnswer += OnSubmitAnswer;
+            GameActions.OnGameOver += OnGameOver;
         }
 
         public override void OnClosePanel()
         {
             TileActions.OnAnswerTilesChanged -= OnAnswerTilesChanged;
-            TileActions.OnScoreChanged -= OnScoreChanged;
+            GameActions.OnScoreChanged -= OnScoreChanged;
+            GameActions.OnSubmitAnswer -= OnSubmitAnswer;
+            GameActions.OnGameOver -= OnGameOver;
         }
 
         private void OnDestroy()
         {
             TileActions.OnAnswerTilesChanged -= OnAnswerTilesChanged;
-            TileActions.OnScoreChanged -= OnScoreChanged;
+            GameActions.OnScoreChanged -= OnScoreChanged;
+            GameActions.OnSubmitAnswer -= OnSubmitAnswer;
+            GameActions.OnGameOver -= OnGameOver;
+        }
+
+        private async void OnGameOver()
+        {
+            HideButtons();
+            await Task.Delay(1500);
+            _gameOverAnimator.SetTrigger("Celebrate");
+        }
+
+        private void OnSubmitAnswer(int score)
+        {
+            HideButtons();
         }
 
         private void OnAnswerTilesChanged()
@@ -50,14 +65,10 @@ namespace GameCore.UI.Canvas
             switch (AnswerTilesManager.Instance.IsAnswerTilesEmpty())
             {
                 case true:
-                    _undoArea.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => { _undoArea.SetActive(false); });
-                    _submitArea.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => { _submitArea.SetActive(false); }).SetDelay(0.2f);
+                    HideButtons();
                     break;
                 case false:
-                    _undoArea.SetActive(true);
-                    _submitArea.SetActive(true);
-                    _undoArea.transform.DOScale(Vector3.one, 0.2f);
-                    _submitArea.transform.DOScale(Vector3.one, 0.2f).SetDelay(0.2f);
+                    ShowButtons();
                     break;
             }
         }
@@ -67,8 +78,42 @@ namespace GameCore.UI.Canvas
             _scoreText.text = $"{RuntimeScoreManager.Instance.GetCurrentScore()}";
             if (!DOTween.IsTweening(_scoreText.transform))
                 _scoreText.transform.DOPunchScale(Vector3.one * 0.2f, 0.5f);
+            HideButtons();
+        }
+
+        private void HideButtons()
+        {
+            if (DOTween.IsTweening(_undoArea.transform)) { _undoArea.transform.DOKill(); }
+            if (DOTween.IsTweening(_submitArea.transform)) { _submitArea.transform.DOKill(); }
+            if (!_undoArea.activeSelf && !_submitArea.activeSelf)
+            {
+                _undoArea.transform.localScale = Vector3.zero;
+                _submitArea.transform.localScale = Vector3.zero;
+                return;
+            }
             _undoArea.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => { _undoArea.SetActive(false); });
             _submitArea.transform.DOScale(Vector3.zero, 0.2f).OnComplete(() => { _submitArea.SetActive(false); }).SetDelay(0.2f);
+        }
+
+        private void ShowButtons()
+        {
+            if (DOTween.IsTweening(_undoArea.transform)) { _undoArea.transform.DOKill(); }
+            if (DOTween.IsTweening(_submitArea.transform)) { _submitArea.transform.DOKill(); }
+            if (_undoArea.activeSelf && _submitArea.activeSelf)
+            {
+                _undoArea.transform.localScale = Vector3.one;
+                _submitArea.transform.localScale = Vector3.one;
+                return;
+            }
+            _undoArea.SetActive(true);
+            _submitArea.SetActive(true);
+            _undoArea.transform.DOScale(Vector3.one, 0.2f);
+            _submitArea.transform.DOScale(Vector3.one, 0.2f).SetDelay(0.2f);
+        }
+
+        public async void OnOKButtonClicked()
+        {
+            await SceneControlManager.Instance.LoadSceneWithFadeInAnimation(SceneName.MainMenu, useLoadingScene: false);
         }
     }
 }
