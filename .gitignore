@@ -9,7 +9,7 @@
 /[Bb]uilds/
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
-/[Aa]ssets/[Gg]ame/[_]Plugins/
+#/[Aa]ssets/[Gg]ame/[_]Plugins/
 #/[.][Vv]scode/
 
 # MemoryCaptures can get excessive in size.
