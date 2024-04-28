@@ -7,15 +7,16 @@ namespace GameCore.LevelSystem
     {
         public string title;
         public int levelPoint;
+        public string[] correctAnswers;
         public LevelTileData[] tiles;
     }
 
     [System.Serializable]
     public class LevelTileData
     {
-        public string id;
+        public int id;
         public Vector3 position;
         public string character;
-        public string[] children;
+        public int[] children;
     }
 }

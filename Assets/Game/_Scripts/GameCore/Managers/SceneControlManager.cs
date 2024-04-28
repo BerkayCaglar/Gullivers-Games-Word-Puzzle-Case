@@ -1,10 +1,10 @@
 using GameCore.SingletonSystem;
 using UnityEngine.SceneManagement;
-using GameCore.UI;
 using System;
 using System.Threading.Tasks;
 using UnityEngine.UI;
 using MyBox;
+using GameCore.UI.Camera;
 
 namespace GameCore.Managers
 {

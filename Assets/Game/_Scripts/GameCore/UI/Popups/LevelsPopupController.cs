@@ -1,7 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using GameCore.LevelSystem;
 using GameCore.PopupSystem;
+using GameCore.ScoreSystem;
 using GameCore.UI.Segments;
 using UnityEngine;
 
@@ -25,7 +24,7 @@ namespace GameCore.UI.Popups
                 {
                     LevelPoint = level.levelPoint,
                     LevelName = level.title,
-                    LevelHighScore = HighScoreSystem.HighScoreManager.Instance.GetHighScore(level.levelPoint)
+                    LevelHighScore = HighScoreManager.Instance.GetHighScore(level.levelPoint)
                 });
             }
         }
@@ -33,11 +32,6 @@ namespace GameCore.UI.Popups
         public override void OnClosePanel()
         {
 
-        }
-
-        public void OnClickCloseButton()
-        {
-            gameObject.SetActive(false);
         }
     }
 }

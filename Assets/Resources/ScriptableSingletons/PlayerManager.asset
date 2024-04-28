@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10e1956b56697954385e8625359ec4c7, type: 3}
   m_Name: PlayerManager
   m_EditorClassIdentifier: 
-  CurrentLevel: 1
+  CurrentPlayerLevel: 4
+  CurrentPlayingLevel: 4

@@ -1,11 +1,10 @@
-using System.Collections;
 using System.Collections.Generic;
 using GameCore.LevelSystem;
 using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
-using GameCore.HighScoreSystem;
-using System;
+using GameCore.ScoreSystem;
+using GameCore.PlayerJourneySystem;
 
 namespace GameCore.Managers
 {
@@ -15,6 +14,7 @@ namespace GameCore.Managers
         {
             SetupScriptableObjectInstances();
             GetLevels();
+            GetEnglishDictionary();
         }
 
         private void SetupScriptableObjectInstances()
@@ -24,7 +24,7 @@ namespace GameCore.Managers
             {
                 var type = scriptableObject.GetType();
                 var property = type.GetProperty("Instance");
-                var instance = property.GetValue(null);
+                var instance = property.GetValue(null); // Create instance
             }
         }
 
@@ -46,10 +46,16 @@ namespace GameCore.Managers
             SetupManagers(levelDatas);
         }
 
-        private void SetupManagers(List<LevelData> levelDatas)
+        private void GetEnglishDictionary()
+        {
+            PossibleWordsSystem.PossibleWordsGenerator.LoadDictionary();
+        }
+
+        private async void SetupManagers(List<LevelData> levelDatas)
         {
             LevelManager.Instance.Setup(levelDatas);
             HighScoreManager.Instance.Setup(levelDatas);
+            await PlayerManager.Instance.Setup();
         }
     }
 }
