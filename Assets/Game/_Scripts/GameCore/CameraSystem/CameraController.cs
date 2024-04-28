@@ -24,6 +24,5 @@ namespace GameCore.CameraSystem
         {
             _virtualCamera.transform.DOMoveZ(-10, 1f).SetEase(Ease.InOutSine);
         }
-
     }
 }

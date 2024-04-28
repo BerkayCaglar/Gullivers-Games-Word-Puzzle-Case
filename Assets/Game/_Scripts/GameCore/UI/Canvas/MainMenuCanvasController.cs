@@ -1,9 +1,4 @@
-using System.Collections;
-using System.Collections.Generic;
-using GameCore.LevelSystem;
 using GameCore.PopupSystem;
-using GameCore.UI.Segments;
-using UnityEngine;
 
 namespace GameCore.UI.Canvas
 {

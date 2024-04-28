@@ -1,5 +1,3 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using GameCore.LevelSystem;
@@ -27,10 +25,8 @@ namespace GameCore.ScoreSystem
             }
             else
             {
-                Debug.Log($"Level Score: {levelHighScoreData.score} - Your Score: {score}");
                 if (score > levelHighScoreData.score)
                 {
-                    Debug.Log("New High Score!");
                     highScores.Remove(levelHighScoreData);
                     highScores.Add(highScoreData);
                     highScores = highScores.OrderByDescending(x => x.score).ToList();
@@ -66,7 +62,6 @@ namespace GameCore.ScoreSystem
 
         private void CreateNewHighScores(List<LevelData> newLevelDatas)
         {
-            Debug.Log("Creating new high scores. Level count: " + newLevelDatas.Count);
             var highScores = new List<HighScoreData>();
             foreach (var levelData in newLevelDatas)
             {

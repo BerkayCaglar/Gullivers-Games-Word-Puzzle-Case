@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using GameCore.GameFlowSystem;
 using GameCore.PopupSystem;
 using GameCore.TileSystem.Managers;
-using UnityEngine;
 
 namespace GameCore.UI.Popups
 {

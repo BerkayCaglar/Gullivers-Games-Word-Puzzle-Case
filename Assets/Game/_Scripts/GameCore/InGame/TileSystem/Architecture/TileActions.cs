@@ -1,5 +1,4 @@
 using System;
-using GameCore.InGame.TileSystem.Controllers;
 
 namespace GameCore.TileSystem.Architecture
 {

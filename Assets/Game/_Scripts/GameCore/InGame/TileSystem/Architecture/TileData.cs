@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using GameCore.InGame.TileSystem;
 using UnityEngine;
 
 namespace GameCore.TileSystem.Architecture

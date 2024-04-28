@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using GameCore.LevelSystem;
 using UnityEngine;
@@ -25,7 +24,7 @@ namespace GameCore.Managers
             {
                 var type = scriptableObject.GetType();
                 var property = type.GetProperty("Instance");
-                var instance = property.GetValue(null);
+                var instance = property.GetValue(null); // Create instance
             }
         }
 

@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using GameCore.InGame.TileSystem.Managers.Answer;
 using GameCore.PlayerJourneySystem;
@@ -67,7 +66,7 @@ namespace GameCore.GameFlowSystem
             {
                 var answer = AnswerTilesManager.Instance.GetAnswer();
                 var firstCharacter = answer[0].ToString();
-                if (firstCharacter == _currentFirstCharacter) yield break; // Check if the first character is the same as the previous one (to prevent unnecessary API calls)
+                if (firstCharacter == _currentFirstCharacter) yield break;
                 _currentFirstCharacter = firstCharacter;
                 GPWAT = PossibleWordsSystem.PossibleWordsGenerator.GetPossibleWordsAsync(firstCharacter, unlockedTiles.Select(x => x.GetTileElements().GetCharacter()).ToArray(), checkOneTime: true);
             }

@@ -4,7 +4,6 @@ using System;
 using GameCore.SingletonSystem;
 using DG.Tweening;
 using UnityEngine.UI;
-using TMPro;
 
 namespace GameCore.PopupSystem
 {
@@ -53,27 +52,19 @@ namespace GameCore.PopupSystem
         private void PopupOpeningAnimation(GameObject popup, GameObject shadowBG)
         {
             var shadowBGImage = shadowBG.GetComponent<Image>();
-
             shadowBGImage.DOFade(0, 0);
             popup.transform.DOScale(Vector3.zero, 0);
-
             var sequence = DOTween.Sequence();
-
             sequence.Append(shadowBGImage.DOFade(1f, 0.4f).SetEase(Ease.InFlash));
-
             sequence.Join(popup.transform.DOScale(Vector3.one, 0.4f));
-
             sequence.OnComplete(() => popup.transform.DOPunchScale(Vector3.one * 0.1f, 0.5f, 10, 1f));
         }
 
         private void PopupClosingAnimation(PopupPanel popupPanel)
         {
             var canvasGroup = popupPanel.GetComponent<CanvasGroup>();
-
             var sequence = DOTween.Sequence();
-
             sequence.Append(canvasGroup.DOFade(0, 0.4f).SetEase(Ease.InFlash));
-
             sequence.OnComplete(() => DestroyPopup(popupPanel));
         }
 

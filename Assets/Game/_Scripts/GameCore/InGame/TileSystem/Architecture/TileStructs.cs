@@ -44,12 +44,10 @@ namespace GameCore.TileSystem.Architecture
         public readonly List<TileController> GetAllChildTiles()
         {
             List<TileController> allChildTiles = new();
-            //Debug.Log($"Character: {Character} ChildTiles: {ChildTiles.Count}");
             allChildTiles.AddRange(ChildTiles);
 
             for (int i = 0; i < allChildTiles.Count; i++)
             {
-                //Debug.Log($"Character: {allChildTiles[i].GetTileElements().GetCharacter()} ChildTiles: {allChildTiles[i].GetTileElements().GetChildTiles().Count}");
                 allChildTiles.AddRange(allChildTiles[i].GetTileElements().GetChildTiles());
             }
 

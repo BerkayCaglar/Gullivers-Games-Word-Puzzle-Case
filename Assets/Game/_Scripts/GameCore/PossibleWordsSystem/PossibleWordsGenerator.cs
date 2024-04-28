@@ -15,9 +15,7 @@ namespace GameCore.PossibleWordsSystem
             var textAssetResourcePath = "StringWordsDatabase/en";
             string[] lines = Resources.Load<TextAsset>(textAssetResourcePath).text.Split('\n');
             dictionaryWords = new HashSet<string>(lines);
-            Debug.Log($"Dictionary loaded. Word count: {dictionaryWords.Count}");
             dictionaryWords.RemoveWhere(x => x.Length > 7);
-            Debug.Log($"Dictionary cleaned. New word count: {dictionaryWords.Count}");
         }
 
         public static async Task<string[]> GetPossibleWordsAsync(string[] letters)
@@ -25,8 +23,9 @@ namespace GameCore.PossibleWordsSystem
             if (dictionaryWords.Count == 0)
             {
                 Debug.LogError("Dictionary is not loaded. Please call LoadDictionary() method first.");
-                LoadDictionary(); // Consider making LoadDictionary async as well for real-world applications
+                LoadDictionary();
             }
+
             //Debug.Log($"Letters: {string.Join(", ", letters)}");
             var possibleWordsFromLetters = await GetPossibleWordsFromLettersAsync(letters);
 
@@ -38,8 +37,9 @@ namespace GameCore.PossibleWordsSystem
             if (dictionaryWords.Count == 0)
             {
                 Debug.LogError("Dictionary is not loaded. Please call LoadDictionary() method first.");
-                LoadDictionary(); // Consider making LoadDictionary async as well for real-world applications
+                LoadDictionary();
             }
+
             //Debug.Log($"Letters: {string.Join(", ", letters)}");
             var possibleWordsFromLetters = await GetPossibleWordsFromLettersAsync(letters, checkOneTime);
 
@@ -51,10 +51,10 @@ namespace GameCore.PossibleWordsSystem
             if (dictionaryWords.Count == 0)
             {
                 Debug.LogError("Dictionary is not loaded. Please call LoadDictionary() method first.");
-                LoadDictionary(); // Consider making LoadDictionary async as well for real-world applications
+                LoadDictionary();
             }
 
-            Debug.Log($"Starts With: {startsWith} - Letters: {string.Join(", ", letters)}");
+            //Debug.Log($"Starts With: {startsWith} - Letters: {string.Join(", ", letters)}");
             var possibleWordsFromLetters = await GetPossibleWordsFromLettersAsync(letters);
 
             return possibleWordsFromLetters.Where(x => x.StartsWith(startsWith.ToLowerInvariant())).ToArray();
@@ -65,10 +65,10 @@ namespace GameCore.PossibleWordsSystem
             if (dictionaryWords.Count == 0)
             {
                 Debug.LogError("Dictionary is not loaded. Please call LoadDictionary() method first.");
-                LoadDictionary(); // Consider making LoadDictionary async as well for real-world applications
+                LoadDictionary();
             }
 
-            Debug.Log($"Starts With: {startsWith} - Letters: {string.Join(", ", letters)}");
+            //Debug.Log($"Starts With: {startsWith} - Letters: {string.Join(", ", letters)}");
             var possibleWordsFromLetters = await GetPossibleWordsFromLettersAsync(startsWith.ToLowerInvariant(), letters, checkOneTime);
 
             return possibleWordsFromLetters.ToArray();
@@ -76,15 +76,10 @@ namespace GameCore.PossibleWordsSystem
 
         public static async Task<string[]> GetPossibleWordsAsync(List<string[]> wordCharacters, bool checkOneTime)
         {
-            // wordCharacters: [ ["a", "b", "c"], ["d", "e", "f"], ["g", "h", "i"] ]
-            // her bir array kelimenin olası harflerini temsil eder
-            // her bir array'in ilk elemanı kelimenin başlangıç harfidir
-            // her bir array'in geri kalan elemanları kelimenin geri kalan harfleridir
-
             if (dictionaryWords.Count == 0)
             {
                 Debug.LogError("Dictionary is not loaded. Please call LoadDictionary() method first.");
-                LoadDictionary(); // Consider making LoadDictionary async as well for real-world applications
+                LoadDictionary();
             }
 
             var possibleWords = new List<string>();
@@ -194,7 +189,7 @@ namespace GameCore.PossibleWordsSystem
             if (dictionaryWords.Count == 0)
             {
                 Debug.LogError("Dictionary is not loaded. Please call LoadDictionary() method first.");
-                LoadDictionary(); // Consider making LoadDictionary async as well for real-world applications
+                LoadDictionary();
             }
 
             return await Task.Run(() => dictionaryWords.Contains(word));
