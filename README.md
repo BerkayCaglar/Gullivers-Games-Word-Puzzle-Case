@@ -20,4 +20,8 @@
 - Worked with PR requests, always need to proceed according to the program :)
 ```
 
+### Do not upgrade or downgrade the project version!
+```
+- Running the project outside of the Unity 2021.3.18f version specified in the case may cause different issues. Therefore, do not upgrade or downgrade the project version. Especially according to local tests, there are significant problems in the project in version 2022. Be careful!
+```
 #### 
