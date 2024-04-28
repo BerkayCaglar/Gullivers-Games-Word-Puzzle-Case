@@ -1,6 +1,6 @@
 
 ## Gullivers-Games-Word-Puzzle-Case
-# Steps to be done ->
+### Steps to be done ->
 ```
 - Since GIT LFS is installed in the project, it needs to be cloned.
        ❛ After the project opens, switch to the SplashScreen scene.
