@@ -5,6 +5,7 @@ using UnityEngine;
 using Newtonsoft.Json;
 using System.Linq;
 using GameCore.ScoreSystem;
+using GameCore.PlayerJourneySystem;
 
 namespace GameCore.Managers
 {
@@ -51,10 +52,11 @@ namespace GameCore.Managers
             PossibleWordsSystem.PossibleWordsGenerator.LoadDictionary();
         }
 
-        private void SetupManagers(List<LevelData> levelDatas)
+        private async void SetupManagers(List<LevelData> levelDatas)
         {
             LevelManager.Instance.Setup(levelDatas);
             HighScoreManager.Instance.Setup(levelDatas);
+            await PlayerManager.Instance.Setup();
         }
     }
 }

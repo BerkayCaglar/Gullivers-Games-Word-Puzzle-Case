@@ -1,11 +1,10 @@
 using System.Collections.Generic;
 using System.Linq;
-using DG.Tweening;
 using GameCore.AnimationSystem;
 using GameCore.GameFlowSystem;
 using GameCore.InGame.TileSystem.Controllers;
 using GameCore.LevelSystem;
-using GameCore.Managers;
+using GameCore.PlayerJourneySystem;
 using GameCore.SingletonSystem;
 using GameCore.TileSystem.Architecture;
 using UnityEngine;

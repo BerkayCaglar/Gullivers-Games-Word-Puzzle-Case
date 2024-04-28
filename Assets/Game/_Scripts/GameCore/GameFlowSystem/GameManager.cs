@@ -1,8 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GameCore.InGame.TileSystem.Managers.Answer;
-using GameCore.Managers;
+using GameCore.PlayerJourneySystem;
 using GameCore.TileSystem.Architecture;
 using GameCore.TileSystem.Managers;
 using UnityEngine;
@@ -12,6 +14,8 @@ namespace GameCore.GameFlowSystem
     public class GameManager : MonoBehaviour
     {
         private static GameState _gameState = GameState.Playing;
+        private string _currentFirstCharacter;
+
         public static GameState GetGameState()
         {
             return _gameState;
@@ -28,32 +32,26 @@ namespace GameCore.GameFlowSystem
             TileActions.OnAnswerTilesChanged -= OnAnswerTilesChanged;
         }
 
-        private CancellationTokenSource cts = new();
-        private async void OnAnswerTilesChanged()
+        private void OnAnswerTilesChanged()
         {
             if (_gameState == GameState.GameOver)
             {
-                CheckForStopTheTask();
+                StopAllCoroutines();
                 return;
             }
 
-            await CheckGameOver(cts);
-
-            void CheckForStopTheTask()
-            {
-                cts.Cancel();
-                cts.Dispose();
-            }
+            StopAllCoroutines();
+            StartCoroutine(CheckGameOver());
         }
 
-        public async Task CheckGameOver(CancellationTokenSource cts)
+        public IEnumerator CheckGameOver()
         {
-            await Task.Delay(500, cts.Token);
+            yield return new WaitForSeconds(0.5f);
 
             if (RuntimeTileManager.Instance.IsAllTilesUsed())
             {
                 EndTheGame();
-                return;
+                yield break;
             }
 
             var unlockedTiles = RuntimeTileManager.Instance.GetUnlockedTiles().OrderBy(x => x.GetTileElements().GetLayer()).ToList();
@@ -61,24 +59,26 @@ namespace GameCore.GameFlowSystem
 
             Task<string[]> GPWAT;
             if (isAnswerTilesEmpty)
+            {
+                _currentFirstCharacter = string.Empty;
                 GPWAT = PossibleWordsSystem.PossibleWordsGenerator.GetPossibleWordsAsync(unlockedTiles.Select(x => x.GetTileElements().GetCharacter()).ToArray(), checkOneTime: true);
+            }
             else
             {
                 var answer = AnswerTilesManager.Instance.GetAnswer();
                 var firstCharacter = answer[0].ToString();
+                if (firstCharacter == _currentFirstCharacter) yield break; // Check if the first character is the same as the previous one (to prevent unnecessary API calls)
+                _currentFirstCharacter = firstCharacter;
                 GPWAT = PossibleWordsSystem.PossibleWordsGenerator.GetPossibleWordsAsync(firstCharacter, unlockedTiles.Select(x => x.GetTileElements().GetCharacter()).ToArray(), checkOneTime: true);
             }
 
-            await Task.WhenAny(GPWAT, Task.Delay(5000, cts.Token));
+            yield return new WaitUntil(() => GPWAT.IsCompleted);
             var possibleWordsFromUnlockedTiles = GPWAT.Result;
-            Debug.Log($"Possible Words From Unlocked Tiles: {string.Join(", ", possibleWordsFromUnlockedTiles)}");
 
-            if (possibleWordsFromUnlockedTiles.Length != 0) return;
+            if (possibleWordsFromUnlockedTiles.Length != 0) yield break;
             GPWAT.Dispose();
 
             var allTiles = RuntimeTileManager.Instance.GetAllTiles().Where(x => x.GetTileState() != TileState.Used).OrderBy(x => x.GetTileElements().GetLayer()).ToList();
-            //var sameLayerTiles = allTiles.Where(x => x.GetTileElements().GetLayer() == allTiles.First().GetTileElements().GetLayer()).ToList();
-            //var letters = allTiles.Select(x => x.GetTileElements().GetCharacter()).ToArray();
 
             var hasWord = false;
             foreach (var tile in allTiles)
@@ -88,13 +88,14 @@ namespace GameCore.GameFlowSystem
                 foreach (var layerTiles in sameLayerTiles)
                 {
                     var startsWith = layerTiles.GetTileElements().GetCharacter();
-                    var letters = layerTiles.GetTileElements().GetAllChildTiles().Select(x => x.GetTileElements().GetCharacter()).ToArray();
-                    letters = letters.Append(layerTiles.GetTileElements().GetCharacter()).ToArray();
-
-                    GPWAT = PossibleWordsSystem.PossibleWordsGenerator.GetPossibleWordsAsync(startsWith, letters, checkOneTime: true);
-                    await Task.WhenAny(GPWAT, Task.Delay(5000, cts.Token));
+                    List<string> letters = new()
+                    {
+                        startsWith
+                    };
+                    letters.AddRange(layerTiles.GetTileElements().GetAllChildTiles().Select(x => x.GetTileElements().GetCharacter()));
+                    GPWAT = PossibleWordsSystem.PossibleWordsGenerator.GetPossibleWordsAsync(startsWith, letters.ToArray(), checkOneTime: true);
+                    yield return new WaitUntil(() => GPWAT.IsCompleted);
                     var possibleWordsFromSameLayerTiles = GPWAT.Result;
-                    Debug.Log($"Possible Words From Same Layer Tiles: {string.Join(", ", possibleWordsFromSameLayerTiles)}");
 
                     if (possibleWordsFromSameLayerTiles.Length != 0)
                     {
@@ -106,40 +107,19 @@ namespace GameCore.GameFlowSystem
                 if (hasWord) break;
             }
 
-            /*
-            var hasWord = false;
-            foreach (var tile in sameLayerTiles)
-            {
-                var startsWith = tile.GetTileElements().GetCharacter();
-                var letters = tile.GetTileElements().GetAllChildTiles().Select(x => x.GetTileElements().GetCharacter()).ToArray();
-                letters = letters.Append(tile.GetTileElements().GetCharacter()).ToArray();
-
-                GPWAT = PossibleWordsSystem.PossibleWordsGenerator.GetPossibleWordsAsync(startsWith, letters, checkOneTime: true);
-                await Task.WhenAny(GPWAT, Task.Delay(5000, cts.Token));
-                var possibleWordsFromSameLayerTiles = GPWAT.Result;
-                Debug.Log($"Possible Words From Same Layer Tiles: {string.Join(", ", possibleWordsFromSameLayerTiles)}");
-
-                if (possibleWordsFromSameLayerTiles.Length != 0)
-                {
-                    hasWord = true;
-                    break;
-                }
-            }
-            */
-
-            if (hasWord) return;
+            if (hasWord) yield break;
 
             GPWAT.Dispose();
             EndTheGame();
         }
 
-        private void SetPlayerLevel()
+        private async void SetPlayerLevel()
         {
             var playerLevel = PlayerManager.Instance.GetCurrentPlayerLevel();
             var currentLevel = PlayerManager.Instance.GetCurrentPlayingLevel();
             if (currentLevel == playerLevel)
             {
-                PlayerManager.Instance.SetCurrentPlayerLevel(playerLevel + 1);
+                await PlayerManager.Instance.SetCurrentPlayerLevel(playerLevel + 1);
             }
         }
 

@@ -1,13 +1,14 @@
 using GameCore.GameFlowSystem;
-using GameCore.Managers;
+using GameCore.PlayerJourneySystem;
 using GameCore.SingletonSystem;
-using UnityEngine;
 
 namespace GameCore.ScoreSystem
 {
     public class RuntimeScoreManager : AutoSingleton<RuntimeScoreManager>
     {
         private int _currentScore;
+        private bool _isEndWithHighScore;
+
         private void Start()
         {
             GameActions.OnSubmitAnswer += OnSubmitAnswer;
@@ -33,18 +34,22 @@ namespace GameCore.ScoreSystem
                 score = _currentScore,
                 level = PlayerManager.Instance.GetCurrentPlayingLevel()
             };
-            Debug.Log($"HighScoreData: {highScoreData.score} - {highScoreData.level}");
             SetHighScore(highScoreData);
         }
 
         private void SetHighScore(HighScoreData highScoreData)
         {
-            HighScoreManager.Instance.SetHighScore(highScoreData);
+            HighScoreManager.Instance.SetHighScore(highScoreData, out _isEndWithHighScore);
         }
 
         public int GetCurrentScore()
         {
             return _currentScore;
+        }
+
+        public bool IsEndWithHighScore()
+        {
+            return _isEndWithHighScore;
         }
     }
 }

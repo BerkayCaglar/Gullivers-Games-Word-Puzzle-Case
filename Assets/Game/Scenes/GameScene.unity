@@ -396,7 +396,7 @@ MonoBehaviour:
   VFXPrefabs:
   - {fileID: 1762952752276261651, guid: 1a328448d7d714323b2b9ba2835d1724, type: 3}
   - {fileID: 3817557494372724381, guid: bb818bcd1f8fc4170ad421ddfa84c1e9, type: 3}
-  VFXAmounts: 0a0000000a000000
+  VFXAmounts: 1e0000001e000000
 --- !u!1001 &466702107
 PrefabInstance:
   m_ObjectHideFlags: 0

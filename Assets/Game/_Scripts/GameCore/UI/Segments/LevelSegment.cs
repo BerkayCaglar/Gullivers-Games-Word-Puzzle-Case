@@ -1,4 +1,5 @@
 using GameCore.Managers;
+using GameCore.PlayerJourneySystem;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,7 +43,7 @@ namespace GameCore.UI.Segments
             segmentState = isLevelEnoughToUnlock ? SegmentState.Unlocked : SegmentState.Locked;
         }
 
-        public void OnClickPlayButton()
+        public async void OnClickPlayButton()
         {
             if (segmentState == SegmentState.Locked)
             {
@@ -50,8 +51,8 @@ namespace GameCore.UI.Segments
                 return;
             }
 
-            PlayerManager.Instance.SetCurrentPlayingLevel(int.Parse(levelPointText.text));
-            _ = SceneControlManager.Instance.LoadSceneWithFadeInAnimation(SceneName.GameScene, useLoadingScene: true);
+            await PlayerManager.Instance.SetCurrentPlayingLevel(int.Parse(levelPointText.text));
+            await SceneControlManager.Instance.LoadSceneWithFadeInAnimation(SceneName.GameScene, useLoadingScene: true);
         }
     }
 }

@@ -4,6 +4,7 @@ using GameCore.GameFlowSystem;
 using GameCore.InGame.TileSystem.Managers.Answer;
 using GameCore.LevelSystem;
 using GameCore.Managers;
+using GameCore.PlayerJourneySystem;
 using GameCore.PopupSystem;
 using GameCore.ScoreSystem;
 using GameCore.TileSystem.Architecture;
@@ -16,6 +17,8 @@ namespace GameCore.UI.Canvas
     {
         [SerializeField] private GameObject _undoArea;
         [SerializeField] private GameObject _submitArea;
+
+        [SerializeField] private TextMeshProUGUI _scoreTitleText;
 
         [SerializeField] private TextMeshProUGUI _scoreText;
         [SerializeField] private TextMeshProUGUI _titleText;
@@ -52,7 +55,9 @@ namespace GameCore.UI.Canvas
         {
             HideButtons();
             await Task.Delay(1500);
-            _gameOverAnimator.SetTrigger("Celebrate");
+            var endWithHighScore = RuntimeScoreManager.Instance.IsEndWithHighScore();
+            _scoreTitleText.text = endWithHighScore ? "NEW HIGH SCORE" : "SCORE";
+            _gameOverAnimator.SetTrigger(endWithHighScore ? "HighScoreCelebrate" : "NormalCelebrate");
         }
 
         private void OnSubmitAnswer(int score)

@@ -63,35 +63,9 @@ namespace GameCore.LevelSystem
         }
 
         [ButtonMethod]
-        public async void SetLevelsCorrectAnswers()
+        public void ClearLevels()
         {
-            await Task.Run(async () =>
-            {
-                var tasks = new List<Task>();
-                Parallel.ForEach(levels, async (level) =>
-                {
-                    var characters = level.tiles.Select(x => x.character).ToArray();
-                    Debug.Log($"Getting possible words for level {level.levelPoint}");
-                    var possibleWords = await PossibleWordsSystem.PossibleWordsGenerator.GetPossibleWordsAsync(characters);
-
-                    // write a json file for each level
-                    var levelAnswerData = new PossibleWordsSystem.LevelAnswerData
-                    {
-                        level = level.levelPoint,
-                        possibleWords = possibleWords
-                    };
-                    var json = JsonConvert.SerializeObject(levelAnswerData);
-                    System.IO.File.WriteAllText($"Assets/Resources/LevelAnswersDatabase/Level_{level.levelPoint}_Answers.json", json);
-                    Debug.Log($"<color=green>Level <color=yellow>{level.levelPoint}</color> answers are saved.</color> [Word count: {possibleWords.Length}]");
-                });
-                await Task.WhenAll(tasks);
-            });
-        }
-
-        [ButtonMethod]
-        public void LoadDictionary()
-        {
-            PossibleWordsSystem.PossibleWordsGenerator.LoadDictionary();
+            levels = new LevelData[0];
         }
     }
 }
