@@ -16,7 +16,6 @@ namespace GameCore.TileSystem.Managers
             get => _lockTouch;
             set
             {
-                Debug.Log($"LockTouch Setted to {value}");
                 _lockTouch = value;
             }
         }

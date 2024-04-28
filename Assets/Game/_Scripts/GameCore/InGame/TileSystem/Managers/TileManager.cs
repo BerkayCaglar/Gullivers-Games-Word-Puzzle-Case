@@ -23,7 +23,7 @@ namespace GameCore.TileSystem.Managers
         private void OnClickTile(ITile ITile)
         {
             if (ITile.GetTileOnActionState() == TileOnActionState.OnAction) return;
-            SendLog(ITile);
+            //SendLog(ITile);
             switch (ITile.GetTileType())
             {
                 case TileType.Tile:
