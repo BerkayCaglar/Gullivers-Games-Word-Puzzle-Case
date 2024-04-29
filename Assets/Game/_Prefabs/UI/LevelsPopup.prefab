@@ -1150,6 +1150,8 @@ MonoBehaviour:
   PopupPanelGO: {fileID: 881971963061972863}
   PopupType: 0
   content: {fileID: 1833988729237677238}
+  scrollRect: {fileID: 1833988728839026193}
+  closeButton: {fileID: 1833988729355154225}
   levelSegmentPrefab: {fileID: 3071348916440973760, guid: 9e182748eb0eefd408e866d0637e27b1, type: 3}
 --- !u!225 &1703993087
 CanvasGroup:

@@ -47,6 +47,11 @@ namespace GameCore.ScoreSystem
             return _currentScore;
         }
 
+        public void SetCurrentScore(int score)
+        {
+            _currentScore = score;
+        }
+
         public bool IsEndWithHighScore()
         {
             return _isEndWithHighScore;

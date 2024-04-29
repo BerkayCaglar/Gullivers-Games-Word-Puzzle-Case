@@ -42,6 +42,11 @@ namespace GameCore.LevelSystem
             return levels[level - 1];
         }
 
+        public LevelData GetMaxLevel()
+        {
+            return levels[^1];
+        }
+
         [ButtonMethod]
         public void GetLevelsFromResources()
         {
