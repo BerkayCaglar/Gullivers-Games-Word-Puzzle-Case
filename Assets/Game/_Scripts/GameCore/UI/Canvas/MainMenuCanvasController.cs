@@ -10,9 +10,15 @@ namespace GameCore.UI.Canvas
 {
     public class MainMenuCanvasController : UIPanel
     {
+        [Header("References")]
+        [SerializeField] private Button _levelsButton;
+
         public override void OnOpenPanel()
         {
-
+            _levelsButton.onClick.AddListener(() =>
+            {
+                StartCoroutine(LevelsButtonInteractableCoroutine());
+            });
         }
 
         public override void OnClosePanel()
@@ -24,6 +30,7 @@ namespace GameCore.UI.Canvas
         {
             if (PlayerPrefs.HasKey("LevelUP"))
             {
+                _levelsButton.interactable = false;
                 StartCoroutine(OpenPopupCoroutine("LevelsPopup"));
             }
         }
@@ -32,6 +39,14 @@ namespace GameCore.UI.Canvas
         {
             yield return new WaitForSeconds(1f);
             OpenPopup(popupName);
+            StartCoroutine(LevelsButtonInteractableCoroutine());
+        }
+
+        private IEnumerator LevelsButtonInteractableCoroutine()
+        {
+            _levelsButton.interactable = false;
+            yield return new WaitForSeconds(1f);
+            _levelsButton.interactable = true;
         }
     }
 }
