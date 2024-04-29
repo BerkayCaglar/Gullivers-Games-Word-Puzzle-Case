@@ -3,14 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GameCore.InGame.TileSystem.Managers.Answer;
+using GameCore.LevelSystem;
 using GameCore.PlayerJourneySystem;
+using GameCore.SingletonSystem;
 using GameCore.TileSystem.Architecture;
 using GameCore.TileSystem.Managers;
 using UnityEngine;
 
 namespace GameCore.GameFlowSystem
 {
-    public class GameManager : MonoBehaviour
+    public class GameManager : AutoSingleton<GameManager>
     {
         private static GameState _gameState = GameState.Playing;
         private string _currentFirstCharacter;
@@ -20,7 +22,7 @@ namespace GameCore.GameFlowSystem
             return _gameState;
         }
 
-        private void Awake()
+        private void Start()
         {
             _gameState = GameState.Playing;
             TileActions.OnAnswerTilesChanged += OnAnswerTilesChanged;
@@ -116,13 +118,15 @@ namespace GameCore.GameFlowSystem
         {
             var playerLevel = PlayerManager.Instance.GetCurrentPlayerLevel();
             var currentLevel = PlayerManager.Instance.GetCurrentPlayingLevel();
-            if (currentLevel == playerLevel)
+            var maxLevel = LevelManager.Instance.GetMaxLevel().levelPoint;
+            if (currentLevel == playerLevel && currentLevel < maxLevel)
             {
                 await PlayerManager.Instance.SetCurrentPlayerLevel(playerLevel + 1);
+                PlayerPrefs.SetInt("LevelUP", 1);
             }
         }
 
-        private void EndTheGame()
+        internal void EndTheGame()
         {
             GameActions.GameOver();
             _gameState = GameState.GameOver;

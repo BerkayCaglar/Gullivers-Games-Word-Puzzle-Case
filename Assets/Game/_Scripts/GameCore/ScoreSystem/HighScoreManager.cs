@@ -105,6 +105,13 @@ namespace GameCore.ScoreSystem
             }
         }
 
+        public bool IsLevelHasHighScore(int level)
+        {
+            var highScores = HighScoreJsonUtility.GetHighScoresFromJson();
+            var highScore = highScores.FirstOrDefault(x => x.level == level);
+            return highScore.score > 0;
+        }
+
         [ButtonMethod]
         public void ResetHighScores()
         {
